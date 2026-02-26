@@ -7,8 +7,8 @@ import { Analytics } from '@vercel/analytics/react'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'BTS Tour Venue Guide',
-  description: 'Find venue policies and information for BTS tour dates',
+  title: 'countwise',
+  description: 'Cross-stitch fabric calculator and more',
 }
 
 export default function RootLayout({
