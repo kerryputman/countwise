@@ -1,129 +1,118 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { supabase, type VenueWithDates } from '@/lib/supabase'
-import VenueCard from '@/components/VenueCard'
-import SearchBar from '@/components/SearchBar'
+import { useMemo, useState } from "react";
 
-export default function Home() {
-  const [venues, setVenues] = useState<VenueWithDates[]>([])
-  const [filteredVenues, setFilteredVenues] = useState<VenueWithDates[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
+const FABRICS = [
+  { count: 14, needle: 24 },
+  { count: 16, needle: 26 },
+  { count: 18, needle: 28 },
+];
 
-  useEffect(() => {
-    fetchVenues()
-  }, [])
+function round1(n: number) {
+  return Math.round(n * 10) / 10;
+}
 
-  useEffect(() => {
-    if (searchTerm === '') {
-      setFilteredVenues(venues)
-    } else {
-      const filtered = venues.filter(venue => 
-        venue.venue_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        venue.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (venue.state && venue.state.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        venue.country.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      setFilteredVenues(filtered)
-    }
-  }, [searchTerm, venues])
+export default function Page() {
+  const [w, setW] = useState<number>(100);
+  const [h, setH] = useState<number>(100);
+  const [allow, setAllow] = useState<number>(2);
 
-  async function fetchVenues() {
-    try {
-      // Fetch venues
-      const { data: venuesData, error: venuesError } = await supabase
-        .from('venues')
-        .select('*')
-        .order('city')
+  const rows = useMemo(() => {
+    return FABRICS.map(({ count, needle }) => {
+      const finishedW = w / count;
+      const finishedH = h / count;
+      const cutW = finishedW + 2 * allow;
+      const cutH = finishedH + 2 * allow;
 
-      if (venuesError) throw venuesError
-
-      // Fetch tour dates
-      const { data: datesData, error: datesError } = await supabase
-        .from('tour_dates')
-        .select('*')
-        .order('show_date')
-
-      if (datesError) throw datesError
-
-      // Combine venues with their dates
-      const venuesWithDates: VenueWithDates[] = (venuesData || []).map(venue => ({
-        ...venue,
-        tour_dates: (datesData || []).filter(date => date.venue_id === venue.id)
-      }))
-
-      // Sort by earliest show date
-      venuesWithDates.sort((a, b) => {
-        const aEarliestDate = a.tour_dates.length > 0 
-          ? new Date(a.tour_dates[0].show_date).getTime() 
-          : Infinity
-        const bEarliestDate = b.tour_dates.length > 0 
-          ? new Date(b.tour_dates[0].show_date).getTime() 
-          : Infinity
-        return aEarliestDate - bEarliestDate
-      })
-
-      setVenues(venuesWithDates)
-      setFilteredVenues(venuesWithDates)
-    } catch (error) {
-      console.error('Error fetching venues:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+      return {
+        count,
+        needle,
+        finishedW: round1(finishedW),
+        finishedH: round1(finishedH),
+        cutW: round1(cutW),
+        cutH: round1(cutH),
+      };
+    });
+  }, [w, h, allow]);
 
   return (
-    <main className="min-h-screen py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <Image
-            src="/btsvenueguide.png"
-            alt="BTS Tour Venue Guide"
-            width={300}
-            height={257}
-            priority
-            className="mx-auto mb-4"
+    <main style={{ maxWidth: 900, margin: "0 auto", padding: 24, fontFamily: "system-ui" }}>
+      <h1 style={{ fontSize: 28, marginBottom: 6 }}>CountWise</h1>
+      <p style={{ marginTop: 0, marginBottom: 18, opacity: 0.8 }}>
+        Cross-stitch fabric cut size across common counts, plus needle suggestions.
+      </p>
+
+      <section
+        style={{
+          display: "grid",
+          gap: 12,
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          marginBottom: 18,
+        }}
+      >
+        <label>
+          Stitch width
+          <input
+            type="number"
+            min={1}
+            value={w}
+            onChange={(e) => setW(Number(e.target.value))}
+            style={{ display: "block", width: "100%", padding: 10, marginTop: 6 }}
           />
-          <p className="text-gray-600 text-lg">
-            Find venue policies and show information for your tour dates
-          </p>
-        </div>
+        </label>
 
-        {/* Search */}
-        <SearchBar 
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          venueCount={filteredVenues.length}
-        />
+        <label>
+          Stitch height
+          <input
+            type="number"
+            min={1}
+            value={h}
+            onChange={(e) => setH(Number(e.target.value))}
+            style={{ display: "block", width: "100%", padding: 10, marginTop: 6 }}
+          />
+        </label>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-            <p className="mt-4 text-gray-600">Loading venues...</p>
-          </div>
-        )}
+        <label>
+          Framing allowance (inches)
+          <input
+            type="number"
+            step="0.25"
+            min={0}
+            value={allow}
+            onChange={(e) => setAllow(Number(e.target.value))}
+            style={{ display: "block", width: "100%", padding: 10, marginTop: 6 }}
+          />
+        </label>
+      </section>
 
-        {/* Venues List */}
-        {!loading && filteredVenues.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-600">
-              {searchTerm ? 'No venues found matching your search.' : 'No venues available yet.'}
-            </p>
-          </div>
-        )}
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th align="left">Aida count</th>
+            <th align="left">Finished size (in)</th>
+            <th align="left">Cut size (in)</th>
+            <th align="left">Needle</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.count} style={{ borderTop: "1px solid rgba(0,0,0,0.12)" }}>
+              <td style={{ padding: "10px 0" }}>{r.count} ct</td>
+              <td style={{ padding: "10px 0" }}>
+                {r.finishedW}" × {r.finishedH}"
+              </td>
+              <td style={{ padding: "10px 0" }}>
+                {r.cutW}" × {r.cutH}"
+              </td>
+              <td style={{ padding: "10px 0" }}>Size {r.needle}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-        {!loading && filteredVenues.length > 0 && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredVenues.map(venue => (
-              <VenueCard key={venue.id} venue={venue} />
-            ))}
-          </div>
-        )}
-      </div>
+      <p style={{ marginTop: 16, fontSize: 13, opacity: 0.7 }}>
+        Needle suggestions assume standard 2-strand stitching on Aida.
+      </p>
     </main>
-  )
+  );
 }
