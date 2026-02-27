@@ -116,11 +116,10 @@ export default function Page() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-linen-900">
-          countwise
+          Fabric Calculator
         </h1>
         <p className="mt-1 text-linen-500">
-          Cross-stitch fabric cut size across common counts, plus needle
-          suggestions.
+          Cut size across common counts, plus needle suggestions.
         </p>
       </div>
 
