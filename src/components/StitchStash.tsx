@@ -102,7 +102,9 @@ export default function StitchStash() {
 
   // ─── Filtered color list ────────────────────────────────────────────────────
   const filteredColors = (() => {
-    let list = tab === 'stash'
+    // When searching, always scan the full DMC list so users can find
+    // any colour by number/name regardless of which tab they're on.
+    let list = (tab === 'stash' && !search)
       ? DMC.filter(c => inventory[c.n] && inventory[c.n].qty > 0)
       : DMC
 
