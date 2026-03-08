@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'countwise',
@@ -24,9 +25,14 @@ export default function HomePage() {
   return (
     <main className="max-w-2xl mx-auto px-4 py-16">
       <div className="mb-12">
-        <h1 className="text-4xl font-bold tracking-tight text-linen-900">
-          countwise
-        </h1>
+        <Image
+          src="/countwise-logo-transparent.png"
+          alt="countwise"
+          width={909}
+          height={342}
+          className="h-16 w-auto mb-4"
+          priority
+        />
         <p className="mt-2 text-linen-500 text-lg">
           Small tools for cross-stitchers.
         </p>
