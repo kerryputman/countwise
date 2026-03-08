@@ -12,10 +12,16 @@ export default function Nav() {
         </Link>
         <div className="flex items-center gap-6">
           <Link
-            href="/"
+            href="/calculator"
             className="text-sm text-linen-700 hover:text-sage-600 transition-colors"
           >
             Fabric Calculator
+          </Link>
+          <Link
+            href="/stash"
+            className="text-sm text-linen-700 hover:text-sage-600 transition-colors"
+          >
+            Stitch Stash
           </Link>
         </div>
       </div>

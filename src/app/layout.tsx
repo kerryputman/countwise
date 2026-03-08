@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Footer from '@/components/Footer'
-import Nav from '@/components/Nav'
 import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -12,7 +10,7 @@ export const metadata: Metadata = {
     template: '%s | countwise',
     default: 'countwise',
   },
-  description: 'Cross-stitch fabric calculator and more',
+  description: 'Small tools for cross-stitchers',
 }
 
 export default function RootLayout({
@@ -23,9 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Nav />
         {children}
-        <Footer />
         <Analytics />
       </body>
     </html>
