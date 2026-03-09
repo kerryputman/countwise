@@ -117,10 +117,11 @@ export default function StitchStash() {
   }, [])
 
   // ─── Filtered color list ────────────────────────────────────────────────────
-  // My Stash (no search): only colours in stash with qty > 0
-  // Browse All + any search on any tab: full DMC list, then filter
+  // My Stash + "All" pill (no search): only colours in stash with qty > 0
+  // Any family/low-stock filter, Browse All, or active search: full DMC list
+  // This makes family pills work identically on both My Stash and Browse All.
   const filteredColors = (() => {
-    let list = (tab === 'stash' && !search)
+    let list = (tab === 'stash' && !search && filter === 'all')
       ? DMC.filter(c => inventory[c.n] && inventory[c.n].qty > 0)
       : DMC
 
@@ -360,11 +361,12 @@ export default function StitchStash() {
                 {projectColors.map(c => (
                   <div
                     key={c.n}
-                    className={s.miniSwatch}
-                    style={{ background: c.hex }}
-                    title={`DMC ${c.n} — ${c.name}`}
+                    className={s.miniSwatchWrap}
                     onClick={() => openColor(c)}
-                  />
+                  >
+                    <div className={s.miniSwatch} style={{ background: c.hex }} />
+                    <span className={s.miniSwatchLabel}>{c.n}</span>
+                  </div>
                 ))}
                 {projectColors.length === 0 && (
                   <span className={s.projectEmpty}>

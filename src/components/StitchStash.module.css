@@ -270,7 +270,7 @@
   background: white;
   border-radius: 14px;
   border: 1px solid var(--border);
-  overflow: hidden;
+  /* no overflow:hidden so swatch labels aren't clipped */
 }
 .projectHeader {
   padding: 14px 16px;
@@ -278,6 +278,7 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
+  border-radius: 14px 14px 0 0; /* top corners match card */
 }
 .projectName { font-family: var(--font-serif); font-size: 17px; color: var(--forest); }
 .projectActions {
@@ -307,16 +308,30 @@
 }
 .projectEditBtn:hover { opacity: 1; background: var(--cream-dark); }
 .projectDeleteBtn:hover { opacity: 1; background: rgba(217, 64, 64, 0.1); }
-.projectSwatches { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; }
+.projectSwatches { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
+.miniSwatchWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.miniSwatchWrap:active { transform: scale(1.15); }
 .miniSwatch {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   border: 2px solid rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  transition: transform 0.15s;
 }
-.miniSwatch:active { transform: scale(1.2); }
+.miniSwatchLabel {
+  font-size: 9px;
+  color: var(--text-light);
+  font-family: var(--font-serif);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
 .projectEmpty { font-size: 13px; color: var(--text-light); padding: 4px 0; }
 .addProjectBtn {
   width: 100%;
