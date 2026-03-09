@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { DMC, FAMILY_ORDER, type DmcColor } from '@/data/dmc'
 import s from './StitchStash.module.css'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface InventoryItem { n: string; qty: number; threshold: number; project: string }
 interface Project { id: string; name: string }
 type Tab = 'stash' | 'browse' | 'projects'
@@ -54,7 +54,7 @@ function dbDelete(store: string, key: string): Promise<void> {
   }))
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function StitchStash() {
   const [tab, setTab] = useState<Tab>('stash')
   const [filter, setFilter] = useState('all')
@@ -68,8 +68,9 @@ export default function StitchStash() {
   const [modalThreshold, setModalThreshold] = useState(1)
   const [modalProject, setModalProject] = useState('')
 
-  // Project modal state
-  const [projectModalOpen, setProjectModalOpen] = useState(false)
+  // Project modal state — 'create' | 'edit' | null
+  const [projectModalMode, setProjectModalMode] = useState<'create' | 'edit' | null>(null)
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null)
   const [projectName, setProjectName] = useState('')
   const projectInputRef = useRef<HTMLInputElement>(null)
 
@@ -78,7 +79,7 @@ export default function StitchStash() {
   const [toastVisible, setToastVisible] = useState(false)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Load from IndexedDB on mount
+  // ─── Load from IndexedDB on mount ──────────────────────────────────────────
   useEffect(() => {
     Promise.all([
       dbGetAll<InventoryItem>('inventory'),
@@ -100,17 +101,34 @@ export default function StitchStash() {
     toastTimer.current = setTimeout(() => setToastVisible(false), 2500)
   }, [])
 
+  // Always reload from DB after mutations so state stays in sync with storage
+  const refreshInventory = useCallback(async () => {
+    const items = await dbGetAll<InventoryItem>('inventory')
+    const invMap: Record<string, InventoryItem> = {}
+    items.forEach(i => { invMap[i.n] = i })
+    setInventory(invMap)
+  }, [])
+
+  const refreshProjects = useCallback(async () => {
+    const prjs = await dbGetAll<Project>('projects')
+    const prjMap: Record<string, Project> = {}
+    prjs.forEach(p => { prjMap[p.id] = p })
+    setProjects(prjMap)
+  }, [])
+
   // ─── Filtered color list ────────────────────────────────────────────────────
+  // My Stash (no search): only colours in stash with qty > 0
+  // Browse All + any search on any tab: full DMC list, then filter
   const filteredColors = (() => {
-    // When searching, always scan the full DMC list so users can find
-    // any colour by number/name regardless of which tab they're on.
     let list = (tab === 'stash' && !search)
       ? DMC.filter(c => inventory[c.n] && inventory[c.n].qty > 0)
       : DMC
 
     if (search) {
       const q = search.toLowerCase()
-      list = list.filter(c => c.n.toLowerCase().includes(q) || c.name.toLowerCase().includes(q))
+      list = list.filter(c =>
+        c.n.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+      )
     }
 
     if (filter === 'low') {
@@ -125,9 +143,17 @@ export default function StitchStash() {
     return list
   })()
 
+  // Filtered project list — search filters by project name
+  const filteredProjects = (() => {
+    const all = Object.values(projects)
+    if (!search) return all
+    const q = search.toLowerCase()
+    return all.filter(p => p.name.toLowerCase().includes(q))
+  })()
+
   const stashCount = Object.values(inventory).filter(i => i.qty > 0).length
 
-  // ─── Open color modal ───────────────────────────────────────────────────────
+  // ─── Open color modal ────────────────────────────────────────────────────────
   function openColor(color: DmcColor) {
     const inv = inventory[color.n]
     setColorModal(color)
@@ -140,45 +166,82 @@ export default function StitchStash() {
 
   async function saveColor() {
     if (!colorModal) return
+    const colorN = colorModal.n
     const item: InventoryItem = {
-      n: colorModal.n,
+      n: colorN,
       qty: modalQty,
       threshold: modalThreshold,
       project: modalProject,
     }
-    setInventory(prev => ({ ...prev, [colorModal.n]: item }))
     await dbPut('inventory', item)
+    await refreshInventory()   // reload all from DB — guarantees state matches storage
     closeColorModal()
-    showToast(`DMC ${colorModal.n} saved — ${modalQty} skein${modalQty !== 1 ? 's' : ''}`)
+    showToast(`DMC ${colorN} saved — ${modalQty} skein${modalQty !== 1 ? 's' : ''}`)
   }
 
   async function removeColor() {
     if (!colorModal) return
     const n = colorModal.n
-    setInventory(prev => { const next = { ...prev }; delete next[n]; return next })
     await dbDelete('inventory', n)
+    await refreshInventory()
     closeColorModal()
     showToast(`DMC ${n} removed from stash`)
   }
 
-  // ─── Project modal ──────────────────────────────────────────────────────────
-  function openProjectModal() {
+  // ─── Project modal ───────────────────────────────────────────────────────────
+  function openCreateProject() {
     setProjectName('')
-    setProjectModalOpen(true)
+    setEditingProjectId(null)
+    setProjectModalMode('create')
     setTimeout(() => projectInputRef.current?.focus(), 300)
+  }
+
+  function openEditProject(p: Project) {
+    setProjectName(p.name)
+    setEditingProjectId(p.id)
+    setProjectModalMode('edit')
+    setTimeout(() => projectInputRef.current?.focus(), 300)
+  }
+
+  function closeProjectModal() {
+    setProjectModalMode(null)
+    setEditingProjectId(null)
+    setProjectName('')
   }
 
   async function saveProject() {
     const name = projectName.trim()
     if (!name) return
-    const proj: Project = { id: Date.now().toString(), name }
-    setProjects(prev => ({ ...prev, [proj.id]: proj }))
-    await dbPut('projects', proj)
-    setProjectModalOpen(false)
-    showToast(`Project "${name}" created`)
+    if (projectModalMode === 'edit' && editingProjectId) {
+      const proj: Project = { id: editingProjectId, name }
+      await dbPut('projects', proj)
+      await refreshProjects()
+      closeProjectModal()
+      showToast(`Project renamed to "${name}"`)
+    } else {
+      const proj: Project = { id: Date.now().toString(), name }
+      await dbPut('projects', proj)
+      await refreshProjects()
+      closeProjectModal()
+      showToast(`Project "${name}" created`)
+    }
   }
 
-  // ─── Render helpers ─────────────────────────────────────────────────────────
+  async function deleteProject(id: string, name: string) {
+    if (!window.confirm(`Delete "${name}"?\n\nAny colours assigned to it will be unassigned.`)) return
+    await dbDelete('projects', id)
+    // Unassign colours from the deleted project
+    const items = await dbGetAll<InventoryItem>('inventory')
+    const updates = items
+      .filter(i => i.project === id)
+      .map(i => dbPut('inventory', { ...i, project: '' }))
+    await Promise.all(updates)
+    await refreshInventory()
+    await refreshProjects()
+    showToast(`"${name}" deleted`)
+  }
+
+  // ─── Render helpers ──────────────────────────────────────────────────────────
   function renderColorGrid(list: DmcColor[]) {
     if (list.length === 0) return null
     return (
@@ -237,31 +300,36 @@ export default function StitchStash() {
             <div className={s.emptyIcon}>🧵</div>
             <h3 className={s.emptyTitle}>Your stash is empty</h3>
             <p className={s.emptyText}>
-              Switch to &ldquo;Browse All&rdquo; to add colours to your stash, or search for a DMC number.
+              Switch to &ldquo;Browse All&rdquo; to browse all {DMC.length} DMC colours
+              and tap any card to add it to your stash.
             </p>
           </div>
         )
       }
-      return <div className={s.noResults}>No colours found matching your search.</div>
+      return <div className={s.noResults}>No colours found.</div>
     }
-    return search ? renderColorGrid(filteredColors) : renderGrouped(filteredColors)
+    return search || filter !== 'all'
+      ? renderColorGrid(filteredColors)
+      : renderGrouped(filteredColors)
   }
 
   // ─── Projects content ────────────────────────────────────────────────────────
   function renderProjects() {
-    const projList = Object.values(projects)
     return (
       <div className={s.projectsList}>
-        {projList.length === 0 && (
+        {filteredProjects.length === 0 && !search && (
           <div className={s.emptyState}>
             <div className={s.emptyIcon}>📋</div>
             <h3 className={s.emptyTitle}>No projects yet</h3>
             <p className={s.emptyText}>
-              Create a project to organise your threads by pattern or project.
+              Create a project to organise your threads by pattern or design.
             </p>
           </div>
         )}
-        {projList.map(p => {
+        {filteredProjects.length === 0 && search && (
+          <div className={s.noResults}>No projects matching &ldquo;{search}&rdquo;</div>
+        )}
+        {filteredProjects.map(p => {
           const projectColors = Object.values(inventory)
             .filter(i => i.project === p.id && i.qty > 0)
             .map(i => DMC.find(c => c.n === i.n))
@@ -270,9 +338,23 @@ export default function StitchStash() {
             <div key={p.id} className={s.projectCard}>
               <div className={s.projectHeader}>
                 <span className={s.projectName}>{p.name}</span>
-                <span className={s.projectCount}>
-                  {projectColors.length} colour{projectColors.length !== 1 ? 's' : ''}
-                </span>
+                <div className={s.projectActions}>
+                  <span className={s.projectCount}>
+                    {projectColors.length} colour{projectColors.length !== 1 ? 's' : ''}
+                  </span>
+                  <button
+                    className={s.projectEditBtn}
+                    onClick={() => openEditProject(p)}
+                    title="Rename project"
+                    aria-label="Rename project"
+                  >✏️</button>
+                  <button
+                    className={s.projectDeleteBtn}
+                    onClick={() => deleteProject(p.id, p.name)}
+                    title="Delete project"
+                    aria-label="Delete project"
+                  >🗑️</button>
+                </div>
               </div>
               <div className={s.projectSwatches}>
                 {projectColors.map(c => (
@@ -280,27 +362,34 @@ export default function StitchStash() {
                     key={c.n}
                     className={s.miniSwatch}
                     style={{ background: c.hex }}
-                    title={`DMC ${c.n}: ${c.name}`}
+                    title={`DMC ${c.n} — ${c.name}`}
                     onClick={() => openColor(c)}
                   />
                 ))}
                 {projectColors.length === 0 && (
                   <span className={s.projectEmpty}>
-                    Assign colours to this project when editing threads
+                    Assign colours to this project via the colour detail screen
                   </span>
                 )}
               </div>
             </div>
           )
         })}
-        <button className={s.addProjectBtn} onClick={openProjectModal}>
+        <button className={s.addProjectBtn} onClick={openCreateProject}>
           + New Project
         </button>
       </div>
     )
   }
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
+  // ─── Render ───────────────────────────────────────────────────────────────────
+  const showFilterPills = tab !== 'projects'
+
+  const searchPlaceholder =
+    tab === 'projects' ? 'Search projects…' :
+    tab === 'browse'   ? 'Search all DMC colours…' :
+                         'Search by number or colour name…'
+
   return (
     <div className={s.app}>
       {/* Header */}
@@ -325,7 +414,7 @@ export default function StitchStash() {
         <input
           type="search"
           className={s.searchInput}
-          placeholder="Search by number or colour name…"
+          placeholder={searchPlaceholder}
           inputMode="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -338,29 +427,31 @@ export default function StitchStash() {
           <button
             key={t}
             className={[s.tabBtn, tab === t ? s.active : ''].join(' ')}
-            onClick={() => { setTab(t); setFilter('all') }}
+            onClick={() => { setTab(t); setFilter('all'); setSearch('') }}
           >
             {t === 'stash' ? 'My Stash' : t === 'browse' ? 'Browse All' : 'Projects'}
           </button>
         ))}
       </nav>
 
-      {/* Filter pills */}
-      <div className={s.filterRow}>
-        {[
-          { key: 'all', label: 'All', alert: false },
-          { key: 'low', label: '⚠ Low Stock', alert: true },
-          ...FAMILY_ORDER.map(f => ({ key: f, label: f, alert: false })),
-        ].map(({ key, label, alert }) => (
-          <span
-            key={key}
-            className={[s.pill, filter === key ? s.active : '', alert ? s.pillAlert : ''].join(' ')}
-            onClick={() => setFilter(key)}
-          >
-            {label}
-          </span>
-        ))}
-      </div>
+      {/* Filter pills — hidden on Projects tab */}
+      {showFilterPills && (
+        <div className={s.filterRow}>
+          {[
+            { key: 'all', label: 'All', alert: false },
+            { key: 'low', label: '⚠ Low Stock', alert: true },
+            ...FAMILY_ORDER.map(f => ({ key: f, label: f, alert: false })),
+          ].map(({ key, label, alert }) => (
+            <span
+              key={key}
+              className={[s.pill, filter === key ? s.active : '', alert ? s.pillAlert : ''].join(' ')}
+              onClick={() => setFilter(key)}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Main content */}
       <main className={s.main}>
@@ -437,14 +528,16 @@ export default function StitchStash() {
         </div>
       </div>
 
-      {/* Project modal */}
+      {/* Project modal — create + edit */}
       <div
-        className={[s.modalOverlay, projectModalOpen ? s.open : ''].join(' ')}
-        onClick={e => { if (e.target === e.currentTarget) setProjectModalOpen(false) }}
+        className={[s.modalOverlay, projectModalMode ? s.open : ''].join(' ')}
+        onClick={e => { if (e.target === e.currentTarget) closeProjectModal() }}
       >
         <div className={s.modal}>
           <div className={s.modalHandle} />
-          <h2 className={s.projectModalTitle}>New Project</h2>
+          <h2 className={s.projectModalTitle}>
+            {projectModalMode === 'edit' ? 'Rename Project' : 'New Project'}
+          </h2>
           <input
             ref={projectInputRef}
             type="text"
@@ -455,7 +548,9 @@ export default function StitchStash() {
             onKeyDown={e => { if (e.key === 'Enter') saveProject() }}
           />
           <div className={s.modalBtnRow}>
-            <button className={s.btnSave} onClick={saveProject}>Create Project</button>
+            <button className={s.btnSave} onClick={saveProject}>
+              {projectModalMode === 'edit' ? 'Save Name' : 'Create Project'}
+            </button>
           </div>
         </div>
       </div>
