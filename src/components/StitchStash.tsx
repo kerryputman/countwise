@@ -404,7 +404,7 @@ export default function StitchStash() {
         </div>
         <div className={s.headerStats}>
           <div className={s.headerCount}>{stashCount}</div>
-          <div className={s.headerCountLabel}>in stash</div>
+          <div className={s.headerCountLabel}>colours in stash</div>
         </div>
       </header>
 
