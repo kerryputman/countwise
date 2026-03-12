@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@400;500&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1280px;
+      height: 640px;
+      overflow: hidden;
+      background: #f2ede3;
+      position: relative;
+      font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    /* Fine Aida cloth grid */
+    .aida {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,125,87,0.09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,125,87,0.09) 1px, transparent 1px),
+        linear-gradient(rgba(79,125,87,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,125,87,0.04) 1px, transparent 1px);
+      background-size: 48px 48px, 48px 48px, 8px 8px, 8px 8px;
+    }
+
+    /* Soft radial gradient overlay — left stays bright, right dims */
+    .fade {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 800px 600px at 35% 50%, transparent 30%, rgba(200,192,172,0.4) 100%);
+    }
+
+    /* Sage accent bar — top */
+    .accent-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: linear-gradient(to right, #4f7d57, #6b9b74, #c0d5c4);
+    }
+
+    /* Decorative cross-stitch panel — right 420px */
+    .cross-panel {
+      position: absolute;
+      right: 0; top: 5px; bottom: 0;
+      width: 420px;
+    }
+
+    /* Fade mask on the left edge of cross panel */
+    .cross-panel::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 180px;
+      background: linear-gradient(to right, #f2ede3, transparent);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .cross-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      align-content: center;
+      padding: 40px 30px;
+      gap: 2px;
+    }
+
+    .cross-cell {
+      aspect-ratio: 1;
+      position: relative;
+    }
+
+    .cross-cell::before,
+    .cross-cell::after {
+      content: '';
+      position: absolute;
+      background: #4f7d57;
+      width: 2.5px;
+      height: 70%;
+      top: 15%;
+      left: 50%;
+      border-radius: 1px;
+      opacity: 0.22;
+    }
+    .cross-cell::before { transform: translateX(-50%) rotate(45deg); }
+    .cross-cell::after  { transform: translateX(-50%) rotate(-45deg); }
+
+    /* Main content left */
+    .content {
+      position: absolute;
+      left: 0;
+      top: 5px;
+      bottom: 0;
+      width: 860px;
+      padding: 0 96px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .logo-wrap {
+      margin-bottom: 18px;
+    }
+
+    .logo-wrap img {
+      height: 72px;
+      width: auto;
+      display: block;
+    }
+
+    .tagline {
+      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      font-size: 30px;
+      font-style: italic;
+      font-weight: 400;
+      color: #5c4e3d;
+      line-height: 1.35;
+      margin-bottom: 44px;
+      letter-spacing: -0.01em;
+    }
+
+    .tools {
+      display: flex;
+      gap: 12px;
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1.5px solid rgba(79, 125, 87, 0.22);
+      border-radius: 100px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #334f39;
+      letter-spacing: -0.01em;
+      backdrop-filter: blur(6px);
+    }
+
+    .chip-icon { font-size: 18px; line-height: 1; }
+
+    /* LNL attribution */
+    .lnl {
+      position: absolute;
+      bottom: 36px;
+      left: 96px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #8c7e67;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .lnl-line {
+      width: 28px;
+      height: 1.5px;
+      background: #6b9b74;
+      border-radius: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="aida"></div>
+  <div class="fade"></div>
+  <div class="accent-top"></div>
+
+  <div class="cross-panel">
+    <div class="cross-grid" id="grid"></div>
+  </div>
+
+  <div class="content">
+    <div class="logo-wrap">
+      <img src="/countwise-logo-transparent.png" alt="countwise">
+    </div>
+    <p class="tagline">Small tools for cross-stitchers.</p>
+    <div class="tools">
+      <div class="chip"><span class="chip-icon">📐</span>Fabric Calculator</div>
+      <div class="chip"><span class="chip-icon">🧵</span>Stitch Stash</div>
+    </div>
+  </div>
+
+  <div class="lnl">
+    <div class="lnl-line"></div>
+    A Low Noise Labs tool
+  </div>
+
+  <script>
+    const grid = document.getElementById('grid');
+    for (let i = 0; i < 80; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cross-cell';
+      grid.appendChild(cell);
+    }
+  </script>
+</body>
+</html>
