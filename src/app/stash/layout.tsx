@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Playfair_Display, DM_Sans } from 'next/font/google'
+import Nav from '@/components/Nav'
+import Footer from '@/components/Footer'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -23,7 +25,9 @@ export default function StashLayout({
 }) {
   return (
     <div className={`${playfair.variable} ${dmSans.variable}`}>
+      <Nav />
       {children}
+      <Footer />
     </div>
   )
 }

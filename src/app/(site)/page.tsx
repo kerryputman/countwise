@@ -3,7 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 export const metadata: Metadata = {
-  title: 'countwise',
+  title: {
+    absolute: 'countwise',
+  },
 }
 
 const tools = [
