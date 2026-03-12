@@ -1,30 +1,46 @@
 # countwise
 
-Cross-stitch fabric calculator and more
+Small tools for cross-stitchers. Built carefully.
+
+**[countwise.lownoiselabs.dev](https://countwise.lownoiselabs.dev)** · Made by [Low Noise Labs](https://lownoiselabs.dev)
+
+---
+
+## Tools
+
+### 📐 Fabric Calculator
+Calculate cut fabric size across common Aida counts, with needle size suggestions. Enter your stitch dimensions and instantly see what you need.
+
+### 🧵 Stitch Stash
+Track your DMC thread inventory and organise by project. Your stash is stored locally in the browser — no account needed, no data leaves your device.
+
+---
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 with React
+- **Framework**: Next.js 15 (App Router) with React 19
 - **Styling**: Tailwind CSS
+- **Storage**: IndexedDB (client-side, for Stitch Stash)
+- **Analytics**: Vercel Analytics
 - **Deployment**: Vercel
 
-## Local Development Setup
+---
 
-1. Clone this repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+## Development
 
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
+```bash
+npm install
+npm run dev
+```
 
-4. Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000).
 
-## Deployment
+No environment variables required.
 
-This project is configured for deployment on Vercel. Connect your GitHub repo to Vercel and add your environment variables in the project settings.
+---
 
+## License
 
+This project is source-available for reference purposes. It is not open for public contributions or redistribution.
+
+© 2026 [Low Noise Labs](https://lownoiselabs.dev)
