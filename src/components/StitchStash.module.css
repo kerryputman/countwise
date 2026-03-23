@@ -164,6 +164,12 @@
 .pill.active { background: var(--forest); color: white; border-color: var(--forest); }
 .pillAlert { border-color: var(--red-alert); color: var(--red-alert); }
 .pillAlert.active { background: var(--red-alert); color: white; }
+.pillAlertIcon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
 
 /* ─── MAIN CONTENT ─── */
 .main {

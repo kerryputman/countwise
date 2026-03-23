@@ -446,7 +446,7 @@ export default function StitchStash() {
         <div className={s.filterRow}>
           {[
             { key: 'all', label: 'All', alert: false },
-            { key: 'low', label: '⚠ Low Stock', alert: true },
+            { key: 'low', label: 'Low Stock', alert: true },
             ...FAMILY_ORDER.map(f => ({ key: f, label: f, alert: false })),
           ].map(({ key, label, alert }) => (
             <span
@@ -454,6 +454,22 @@ export default function StitchStash() {
               className={[s.pill, filter === key ? s.active : '', alert ? s.pillAlert : ''].join(' ')}
               onClick={() => setFilter(key)}
             >
+              {alert && (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  className={s.pillAlertIcon}
+                >
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                </svg>
+              )}
               {label}
             </span>
           ))}

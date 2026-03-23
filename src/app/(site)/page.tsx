@@ -46,16 +46,77 @@ const PaletteIcon = () => (
   </svg>
 )
 
+const CalcPreview = () => (
+  <svg viewBox="0 0 200 68" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full rounded-lg" aria-hidden="true">
+    {/* Header row */}
+    <rect width="200" height="18" fill="#d4e5d6" />
+    <rect x="6" y="5" width="26" height="7" rx="3" fill="#7a9e7e" opacity="0.8" />
+    <rect x="52" y="5" width="22" height="7" rx="3" fill="#7a9e7e" opacity="0.8" />
+    <rect x="96" y="5" width="44" height="7" rx="3" fill="#7a9e7e" opacity="0.8" />
+    <rect x="162" y="5" width="28" height="7" rx="3" fill="#7a9e7e" opacity="0.8" />
+    {/* Row 1 */}
+    <rect y="18" width="200" height="17" fill="white" />
+    <rect x="6" y="23" width="22" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="52" y="23" width="16" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="96" y="23" width="52" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="162" y="23" width="20" height="6" rx="2" fill="#c8d9c9" />
+    {/* Row 2 */}
+    <rect y="35" width="200" height="17" fill="#f9f6f0" />
+    <rect x="6" y="40" width="22" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="52" y="40" width="16" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="96" y="40" width="52" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="162" y="40" width="20" height="6" rx="2" fill="#c8d9c9" />
+    {/* Row 3 */}
+    <rect y="52" width="200" height="17" fill="white" />
+    <rect x="6" y="57" width="22" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="52" y="57" width="16" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="96" y="57" width="52" height="6" rx="2" fill="#c8d9c9" />
+    <rect x="162" y="57" width="20" height="6" rx="2" fill="#c8d9c9" />
+  </svg>
+)
+
+const SWATCH_COLORS = [
+  '#C5283D', '#E8845A', '#F5C518', '#9DC86A', '#4A90D9', '#9B59B6',
+  '#FF6B9D', '#1ABC9C', '#6B4F3A', '#E67E22', '#2E7D52', '#5C7EA8',
+  '#F0C8B8', '#B8D4E8', '#C8E6C9', '#F8E0A0', '#D4B0C8', '#B0B0A8',
+]
+
+const StashPreview = () => {
+  const cols = 6
+  const rows = 3
+  const r = 10
+  const colSpacing = 30
+  const rowSpacing = 22
+  const startX = 13
+  const startY = 13
+  return (
+    <svg viewBox="0 0 200 68" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full rounded-lg" aria-hidden="true">
+      <rect width="200" height="68" fill="white" />
+      {SWATCH_COLORS.slice(0, cols * rows).map((color, i) => {
+        const col = i % cols
+        const row = Math.floor(i / cols)
+        const cx = startX + col * colSpacing
+        const cy = startY + row * rowSpacing
+        return (
+          <circle key={i} cx={cx} cy={cy} r={r} fill={color} stroke="rgba(0,0,0,0.08)" strokeWidth="1" />
+        )
+      })}
+    </svg>
+  )
+}
+
 const tools = [
   {
     href: '/calculator',
     icon: <RulerIcon />,
+    preview: <CalcPreview />,
     name: 'Fabric Calculator',
     description: 'Cut size across common counts, with needle suggestions.',
   },
   {
     href: '/stash',
     icon: <PaletteIcon />,
+    preview: <StashPreview />,
     name: 'Stitch Stash',
     description: 'Track your DMC thread inventory and organise by project.',
   },
@@ -90,6 +151,9 @@ export default function HomePage() {
               {tool.name}
             </h2>
             <p className="mt-1 text-sm text-linen-500">{tool.description}</p>
+            <div className="mt-4 rounded-lg overflow-hidden border border-linen-100">
+              {tool.preview}
+            </div>
           </Link>
         ))}
       </div>

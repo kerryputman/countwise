@@ -200,6 +200,11 @@ export default function FabricCalculator() {
       </div>
 
       {/* Results table */}
+      {(w <= 0 || h <= 0) ? (
+        <div className="bg-white border border-linen-200 rounded-2xl shadow-sm px-6 py-10 text-center text-linen-400 text-sm">
+          Enter your stitch dimensions above to see fabric sizes.
+        </div>
+      ) : (
       <div className="bg-white border border-linen-200 rounded-2xl shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <caption className="sr-only">
@@ -257,6 +262,7 @@ export default function FabricCalculator() {
           </tbody>
         </table>
       </div>
+      )}
 
       <p className="mt-4 text-xs text-linen-500">
         Needle sizes assume 2-strand stitching. Evenweave counts are thread
