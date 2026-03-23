@@ -202,21 +202,24 @@ export default function FabricCalculator() {
       {/* Results table */}
       <div className="bg-white border border-linen-200 rounded-2xl shadow-sm overflow-hidden">
         <table className="w-full text-sm">
+          <caption className="sr-only">
+            Fabric cut sizes and needle recommendations for your stitch dimensions
+          </caption>
           <thead>
             <tr className="bg-linen-100">
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
+              <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
                 Count
               </th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
+              <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
                 Type
               </th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
+              <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
                 Finished size
               </th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
+              <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
                 Cut size
               </th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
+              <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-linen-700">
                 Needle
               </th>
             </tr>

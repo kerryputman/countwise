@@ -301,9 +301,14 @@ export default function StitchStash() {
             <div className={s.emptyIcon}>🧵</div>
             <h3 className={s.emptyTitle}>Your stash is empty</h3>
             <p className={s.emptyText}>
-              Switch to &ldquo;Browse All&rdquo; to browse all {DMC.length} DMC colours
-              and tap any card to add it to your stash.
+              Browse all {DMC.length} DMC colours and tap any card to add it to your stash.
             </p>
+            <button
+              className={s.browseBtn}
+              onClick={() => { setTab('browse'); setFilter('all'); setSearch('') }}
+            >
+              Browse all colours
+            </button>
           </div>
         )
       }

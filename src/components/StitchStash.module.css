@@ -114,7 +114,8 @@
 }
 .tabBtn {
   flex: 1;
-  padding: 10px 8px;
+  min-height: 44px;
+  padding: 12px 8px;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.5);
@@ -146,7 +147,10 @@
 .filterRow::-webkit-scrollbar { display: none; }
 .pill {
   flex-shrink: 0;
-  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
   border-radius: 20px;
   border: 1px solid var(--border);
   background: white;
@@ -263,6 +267,21 @@
 }
 .emptyText { font-size: 13px; line-height: 1.6; }
 .noResults { text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 14px; }
+.browseBtn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: var(--forest);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 44px;
+}
+.browseBtn:hover { background: var(--forest-mid); }
 
 /* ─── PROJECTS ─── */
 .projectsList { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
