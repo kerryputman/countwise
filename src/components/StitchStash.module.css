@@ -134,6 +134,20 @@
 }
 
 /* ─── FILTER PILLS ─── */
+.filterWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.filterWrap::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 36px;
+  background: linear-gradient(to right, transparent, var(--cream-dark));
+  pointer-events: none;
+}
 .filterRow {
   display: flex;
   gap: 6px;

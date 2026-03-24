@@ -407,10 +407,12 @@ export default function StitchStash() {
           </h1>
           <p className={s.headerTagline}>DMC Thread Inventory</p>
         </div>
-        <div className={s.headerStats}>
-          <div className={s.headerCount}>{stashCount}</div>
-          <div className={s.headerCountLabel}>colours in stash</div>
-        </div>
+        {stashCount > 0 && (
+          <div className={s.headerStats}>
+            <div className={s.headerCount}>{stashCount}</div>
+            <div className={s.headerCountLabel}>colours in stash</div>
+          </div>
+        )}
       </header>
 
       {/* Search */}
@@ -443,6 +445,7 @@ export default function StitchStash() {
 
       {/* Filter pills — hidden on Projects tab */}
       {showFilterPills && (
+        <div className={s.filterWrap}>
         <div className={s.filterRow}>
           {[
             { key: 'all', label: 'All', alert: false },
@@ -473,6 +476,7 @@ export default function StitchStash() {
               {label}
             </span>
           ))}
+        </div>
         </div>
       )}
 

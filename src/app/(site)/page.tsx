@@ -137,6 +137,9 @@ export default function HomePage() {
         <p className="text-linen-500 text-lg">
           Small tools for cross-stitchers.
         </p>
+        <p className="mt-2 text-sm text-linen-400 tracking-wide">
+          Free · No account needed · Works on mobile
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

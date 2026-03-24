@@ -35,7 +35,7 @@ export default function Footer() {
               <Link href="https://lownoiselabs.dev" target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition-colors">
                 Low Noise Labs
               </Link>
-              {' '}• Small tools. Built carefully.
+              {' '}• Small tools, gentle systems.
             </p>
           </div>
         </div>
